@@ -38,7 +38,7 @@ interface StickyHeadersCallback {
     fun isStickyHeader(position: Int): Boolean
 
     /**
-     * This will be called when the view turns into a sticky state
+     * This will be called when the view goes into a sticky state
      */
     fun setupStickyHeaderView(stickyHeader: View)
 
@@ -49,7 +49,7 @@ interface StickyHeadersCallback {
 }
 
 /**
- * LinearLayoutManager which supports sticky headers
+ * LinearLayoutManager with sticky header suppotz
  */
 class StickyHeadersLayoutManager @JvmOverloads constructor(context: Context,
                                                            orientation: Int = LinearLayoutManager.VERTICAL,
@@ -58,8 +58,8 @@ class StickyHeadersLayoutManager @JvmOverloads constructor(context: Context,
 
     private var adapter: RecyclerView.Adapter<*>? = null
 
-    private var translationX: Float = 0.toFloat()
-    private var translationY: Float = 0.toFloat()
+    private var translationX = 0.toFloat()
+    private var translationY = 0.toFloat()
 
     private val headerPositions = ArrayList<Int>()
     private val headerPositionsObserver = HeaderPositionsAdapterDataObserver()
@@ -95,7 +95,7 @@ class StickyHeadersLayoutManager @JvmOverloads constructor(context: Context,
      * Returns true if `view` is the current sticky header.
      */
     fun isStickyHeader(view: View): Boolean {
-        return view === stickyHeader
+        return view == stickyHeader
     }
 
     /**
@@ -366,7 +366,7 @@ class StickyHeadersLayoutManager @JvmOverloads constructor(context: Context,
                     if (nextHeaderPos != -1) {
                         nextHeaderView = getChildAt(anchorIndex + (nextHeaderPos - anchorPos))
                         // The header view itself is added to the RecyclerView. Discard it if it comes up.
-                        if (nextHeaderView === stickyHeader) {
+                        if (nextHeaderView == stickyHeader) {
                             nextHeaderView = null
                         }
                     }
