@@ -58,8 +58,8 @@ class StickyHeadersLayoutManager @JvmOverloads constructor(context: Context,
 
     private var adapter: RecyclerView.Adapter<*>? = null
 
-    private var translationX = 0.toFloat()
-    private var translationY = 0.toFloat()
+    private var translationX = 0f
+    private var translationY = 0f
 
     private val headerPositions = ArrayList<Int>()
     private val headerPositionsObserver = HeaderPositionsAdapterDataObserver()
