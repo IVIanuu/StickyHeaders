@@ -49,7 +49,7 @@ interface StickyHeadersCallback {
 }
 
 /**
- * LinearLayoutManager with sticky header suppotz
+ * [LinearLayoutManager] with sticky header support
  */
 class StickyHeadersLayoutManager @JvmOverloads constructor(context: Context,
                                                            orientation: Int = LinearLayoutManager.VERTICAL,
