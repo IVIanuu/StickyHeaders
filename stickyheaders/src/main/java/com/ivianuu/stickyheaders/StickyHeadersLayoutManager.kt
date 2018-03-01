@@ -32,34 +32,51 @@ import java.util.*
  * Callback to determine if the position is a sticky header or not
  */
 interface StickyHeadersCallback {
-    /**
-     * Returns whether the view at this position is a sticky header or not
-     */
+
     fun isStickyHeader(position: Int): Boolean
 
-    /**
-     * This will be called when the view goes into a sticky state
-     */
     fun setupStickyHeaderView(stickyHeader: View)
 
-    /**
-     * Should revert any changes made in [setupStickyHeaderView]
-     */
     fun teardownStickyHeaderView(stickyHeader: View)
 }
 
 /**
  * [LinearLayoutManager] with sticky header support
  */
-class StickyHeadersLayoutManager @JvmOverloads constructor(context: Context,
-                                                           orientation: Int = LinearLayoutManager.VERTICAL,
-                                                           reverseLayout: Boolean = false
+class StickyHeadersLayoutManager @JvmOverloads constructor(
+    context: Context,
+    orientation: Int = LinearLayoutManager.VERTICAL,
+    reverseLayout: Boolean = false
 ): LinearLayoutManager(context, orientation, reverseLayout) {
 
-    private var adapter: RecyclerView.Adapter<*>? = null
+    var stickyHeaderTranslationX = 0f
+        set(value) {
+            if (field == value) return
+            field = value
+            requestLayout()
+        }
 
-    private var translationX = 0f
-    private var translationY = 0f
+    var stickyHeaderTranslationY = 0f
+        set(value) {
+            if (field == value) return
+            field = value
+            requestLayout()
+        }
+
+    var callback: StickyHeadersCallback? = null
+
+    var areStickyHeadersEnabled = true
+        set(value) {
+            if (field == value) return
+            field = value
+            if (value) {
+                requestLayout()
+            } else if (stickyHeader != null) {
+                scrapStickyHeader(null)
+            }
+        }
+
+    private var adapter: RecyclerView.Adapter<*>? = null
 
     private val headerPositions = ArrayList<Int>()
     private val headerPositionsObserver = HeaderPositionsAdapterDataObserver()
@@ -70,63 +87,13 @@ class StickyHeadersLayoutManager @JvmOverloads constructor(context: Context,
     private var pendingScrollPosition = RecyclerView.NO_POSITION
     private var pendingScrollOffset = 0
 
-    private var callback: StickyHeadersCallback? = null
-    private var enabled = true
-    
-    /**
-     * Offsets the vertical location of the sticky header relative to the its default position.
-     */
-    fun setStickyHeaderTranslationY(translationY: Float) {
-        if (this.translationY == translationY) return
-        this.translationY = translationY
-        requestLayout()
-    }
-
-    /**
-     * Offsets the horizontal location of the sticky header relative to the its default position.
-     */
-    fun setStickyHeaderTranslationX(translationX: Float) {
-        if (this.translationX == translationX) return
-        this.translationX = translationX
-        requestLayout()
-    }
-
-    /**
-     * Returns true if `view` is the current sticky header.
-     */
     fun isStickyHeader(view: View): Boolean {
         return view == stickyHeader
     }
 
-    /**
-     * Sets the sticky headers callback
-     */
-    fun setCallback(callback: StickyHeadersCallback?) {
-        this.callback = callback
-    }
-
-    /**
-     * Sets sticky headers enabled
-     */
-    fun setStickyHeadersEnabled(enabled: Boolean) {
-        if (this.enabled == enabled) return
-
-        this.enabled = enabled
-        if (enabled) {
-            requestLayout()
-        } else if (stickyHeader != null) {
-            scrapStickyHeader(null)
-        }
-    }
-
-    /**
-     * Returns whether sticky headers are enabled or not
-     */
-    fun areStickyHeadersEnabled() = enabled
-
-    override fun onAttachedToWindow(view: RecyclerView?) {
+    override fun onAttachedToWindow(view: RecyclerView) {
         super.onAttachedToWindow(view)
-        view?.let { setAdapter(it.adapter) }
+        setAdapter(view.adapter)
     }
 
     override fun onAdapterChanged(oldAdapter: RecyclerView.Adapter<*>?, newAdapter: RecyclerView.Adapter<*>?) {
@@ -147,8 +114,10 @@ class StickyHeadersLayoutManager @JvmOverloads constructor(context: Context,
         }
     }
 
-    override fun onSaveInstanceState() =
-            com.ivianuu.stickyheaders.SavedState(super.onSaveInstanceState(), pendingScrollPosition, pendingScrollOffset)
+    override fun onSaveInstanceState(): Parcelable? {
+        return com.ivianuu.stickyheaders.SavedState(
+            super.onSaveInstanceState(), pendingScrollPosition, pendingScrollOffset)
+    }
 
     override fun onRestoreInstanceState(state: Parcelable?) {
         if (state != null && state is com.ivianuu.stickyheaders.SavedState) {
@@ -160,38 +129,32 @@ class StickyHeadersLayoutManager @JvmOverloads constructor(context: Context,
         }
     }
 
-    override fun scrollVerticallyBy(dy: Int, recycler: RecyclerView.Recycler?, state: RecyclerView.State?): Int {
+    override fun scrollVerticallyBy(dy: Int, recycler: RecyclerView.Recycler, state: RecyclerView.State): Int {
         detachStickyHeader()
         val scrolled = super.scrollVerticallyBy(dy, recycler, state)
         attachStickyHeader()
 
-        if (scrolled != 0) {
-            recycler?.let { updateStickyHeader(it, false) }
-        }
+        if (scrolled != 0) updateStickyHeader(recycler, false)
 
         return scrolled
     }
 
-    override fun scrollHorizontallyBy(dx: Int, recycler: RecyclerView.Recycler?, state: RecyclerView.State?): Int {
+    override fun scrollHorizontallyBy(dx: Int, recycler: RecyclerView.Recycler, state: RecyclerView.State): Int {
         detachStickyHeader()
         val scrolled = super.scrollHorizontallyBy(dx, recycler, state)
         attachStickyHeader()
 
-        if (scrolled != 0) {
-            recycler?.let { updateStickyHeader(it, false) }
-        }
+        if (scrolled != 0) updateStickyHeader(recycler, false)
 
         return scrolled
     }
 
-    override fun onLayoutChildren(recycler: RecyclerView.Recycler?, state: RecyclerView.State) {
+    override fun onLayoutChildren(recycler: RecyclerView.Recycler, state: RecyclerView.State) {
         detachStickyHeader()
         super.onLayoutChildren(recycler, state)
         attachStickyHeader()
 
-        if (!state.isPreLayout) {
-            recycler?.let { updateStickyHeader(it, true) }
-        }
+        if (!state.isPreLayout) updateStickyHeader(recycler, true)
     }
 
     override fun scrollToPosition(position: Int) {
@@ -298,22 +261,15 @@ class StickyHeadersLayoutManager @JvmOverloads constructor(context: Context,
     }
 
     private fun detachStickyHeader() {
-        if (stickyHeader != null) {
-            detachView(stickyHeader)
-        }
+        stickyHeader?.let { detachView(it) }
     }
 
     private fun attachStickyHeader() {
-        if (stickyHeader != null) {
-            attachView(stickyHeader)
-        }
+        stickyHeader?.let { attachView(it) }
     }
 
-    /**
-     * Updates the sticky header state (creation, binding, display), to be called whenever there's a layout or scroll
-     */
     private fun updateStickyHeader(recycler: RecyclerView.Recycler, layout: Boolean) {
-        if (!enabled) return
+        if (!areStickyHeadersEnabled) return
 
         val headerCount = headerPositions.size
         val childCount = childCount
@@ -445,20 +401,20 @@ class StickyHeadersLayoutManager @JvmOverloads constructor(context: Context,
         this.stickyHeader = null
         stickyHeaderPosition = RecyclerView.NO_POSITION
 
-        stickyHeader?.let {
+        if (stickyHeader != null) {
             // Revert translation values.
-            it.translationX = 0f
-            it.translationY = 0f
+            stickyHeader.translationX = 0f
+            stickyHeader.translationY = 0f
 
             // Teardown holder if the adapter requires it.
-            callback?.teardownStickyHeaderView(it)
+            callback?.teardownStickyHeaderView(stickyHeader)
 
             // Stop ignoring sticky header so that it can be recycled.
-            stopIgnoringView(it)
+            stopIgnoringView(stickyHeader)
 
             // Remove and recycle sticky header.
-            removeView(it)
-            recycler?.recycleView(it)
+            removeView(stickyHeader)
+            recycler?.recycleView(stickyHeader)
         }
     }
 
@@ -466,15 +422,15 @@ class StickyHeadersLayoutManager @JvmOverloads constructor(context: Context,
         return if (!params.isItemRemoved && !params.isViewInvalid) {
             if (orientation == LinearLayoutManager.VERTICAL) {
                 if (reverseLayout) {
-                    view.top + view.translationY <= height + translationY
+                    view.top + view.translationY <= height + stickyHeaderTranslationY
                 } else {
-                    view.bottom - view.translationY >= translationY
+                    view.bottom - view.translationY >= stickyHeaderTranslationY
                 }
             } else {
                 if (reverseLayout) {
-                    view.left + view.translationX <= width + translationX
+                    view.left + view.translationX <= width + stickyHeaderTranslationX
                 } else {
-                    view.right - view.translationX >= translationX
+                    view.right - view.translationX >= stickyHeaderTranslationX
                 }
             }
         } else {
@@ -485,22 +441,22 @@ class StickyHeadersLayoutManager @JvmOverloads constructor(context: Context,
     private fun isViewOnBoundary(view: View): Boolean {
         return if (orientation == LinearLayoutManager.VERTICAL) {
             if (reverseLayout) {
-                view.bottom - view.translationY > height + translationY
+                view.bottom - view.translationY > height + stickyHeaderTranslationY
             } else {
-                view.top + view.translationY < translationY
+                view.top + view.translationY < stickyHeaderTranslationY
             }
         } else {
             if (reverseLayout) {
-                view.right - view.translationX > width + translationX
+                view.right - view.translationX > width + stickyHeaderTranslationX
             } else {
-                view.left + view.translationX < translationX
+                view.left + view.translationX < stickyHeaderTranslationX
             }
         }
     }
 
     private fun getY(headerView: View, nextHeaderView: View?): Float {
-        if (orientation == LinearLayoutManager.VERTICAL) {
-            var y = translationY
+        return if (orientation == LinearLayoutManager.VERTICAL) {
+            var y = stickyHeaderTranslationY
             if (reverseLayout) {
                 y += (height - headerView.height).toFloat()
             }
@@ -511,15 +467,15 @@ class StickyHeadersLayoutManager @JvmOverloads constructor(context: Context,
                     Math.min((nextHeaderView.top - headerView.height).toFloat(), y)
                 }
             }
-            return y
+            y
         } else {
-            return translationY
+            stickyHeaderTranslationY
         }
     }
 
     private fun getX(headerView: View, nextHeaderView: View?): Float {
-        if (orientation != LinearLayoutManager.VERTICAL) {
-            var x = translationX
+        return if (orientation != LinearLayoutManager.VERTICAL) {
+            var x = stickyHeaderTranslationX
             if (reverseLayout) {
                 x += (width - headerView.width).toFloat()
             }
@@ -530,9 +486,9 @@ class StickyHeadersLayoutManager @JvmOverloads constructor(context: Context,
                     Math.min((nextHeaderView.left - headerView.width).toFloat(), x)
                 }
             }
-            return x
+            x
         } else {
-            return translationX
+            stickyHeaderTranslationX
         }
     }
 
@@ -578,8 +534,23 @@ class StickyHeadersLayoutManager @JvmOverloads constructor(context: Context,
 
     private inner class HeaderPositionsAdapterDataObserver : RecyclerView.AdapterDataObserver() {
         override fun onChanged() {
+            handleChange()
+        }
+
+        override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
+            handleChange()
+        }
+
+        override fun onItemRangeRemoved(positionStart: Int, itemCount: Int) {
+            handleChange()
+        }
+
+        override fun onItemRangeMoved(fromPosition: Int, toPosition: Int, itemCount: Int) {
+            handleChange()
+        }
+
+        private fun handleChange() {
             adapter?.let {
-                // There's no hint at what changed, so go through the adapter.
                 headerPositions.clear()
                 val itemCount = it.itemCount
                 (0 until itemCount).filterTo(headerPositions) { isStickyHeader(it) }
@@ -589,18 +560,6 @@ class StickyHeadersLayoutManager @JvmOverloads constructor(context: Context,
                     scrapStickyHeader(null)
                 }
             }
-        }
-
-        override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
-            onChanged()
-        }
-
-        override fun onItemRangeRemoved(positionStart: Int, itemCount: Int) {
-            onChanged()
-        }
-
-        override fun onItemRangeMoved(fromPosition: Int, toPosition: Int, itemCount: Int) {
-            onChanged()
         }
     }
 }

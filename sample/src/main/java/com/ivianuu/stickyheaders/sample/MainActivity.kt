@@ -21,7 +21,7 @@ class MainActivity : AppCompatActivity() {
 
         button.setOnClickListener {
             (recycler.layoutManager as StickyHeadersLayoutManager).let {
-                it.setStickyHeadersEnabled(!it.areStickyHeadersEnabled())
+                it.areStickyHeadersEnabled = !it.areStickyHeadersEnabled
             }
         }
 
@@ -30,22 +30,26 @@ class MainActivity : AppCompatActivity() {
                 set(getSampleData())
             }
             layoutManager = StickyHeadersLayoutManager(this@MainActivity).apply {
-                setCallback(object : StickyHeadersCallback{
+                callback = object : StickyHeadersCallback{
                     override fun isStickyHeader(position: Int) =
-                            adapter.getItemViewType(position) == R.layout.item_header
+                        adapter.getItemViewType(position) == R.layout.item_header
 
                     override fun setupStickyHeaderView(stickyHeader: View) {
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                            stickyHeader.z = 4.px
+                            stickyHeader.animate()
+                                .translationZ(4.px)
+                                .start()
                         }
                     }
 
                     override fun teardownStickyHeaderView(stickyHeader: View) {
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                            stickyHeader.z = 0f
+                            stickyHeader.animate()
+                                .translationZ(0f)
+                                .start()
                         }
                     }
-                })
+                }
             }
         }
     }
@@ -70,5 +74,5 @@ class MainActivity : AppCompatActivity() {
     }
 
     private val Int.px
-        get() = this * Resources.getSystem().getDisplayMetrics().density
+        get() = this * Resources.getSystem().displayMetrics.density
 }
