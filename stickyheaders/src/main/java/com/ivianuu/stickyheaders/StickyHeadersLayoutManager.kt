@@ -29,18 +29,6 @@ import kotlinx.android.parcel.Parcelize
 import java.util.*
 
 /**
- * Callback to determine if the position is a sticky header or not
- */
-interface StickyHeadersCallback {
-
-    fun isStickyHeader(position: Int): Boolean
-
-    fun setupStickyHeaderView(stickyHeader: View)
-
-    fun teardownStickyHeaderView(stickyHeader: View)
-}
-
-/**
  * [LinearLayoutManager] with sticky header support
  */
 class StickyHeadersLayoutManager @JvmOverloads constructor(
@@ -63,7 +51,7 @@ class StickyHeadersLayoutManager @JvmOverloads constructor(
             requestLayout()
         }
 
-    var callback: StickyHeadersCallback? = null
+    var callback: StickyHeadersLayoutManager.Callback? = null
 
     var areStickyHeadersEnabled = true
         set(value) {
@@ -115,12 +103,12 @@ class StickyHeadersLayoutManager @JvmOverloads constructor(
     }
 
     override fun onSaveInstanceState(): Parcelable? {
-        return com.ivianuu.stickyheaders.SavedState(
+        return SavedState(
             super.onSaveInstanceState(), pendingScrollPosition, pendingScrollOffset)
     }
 
     override fun onRestoreInstanceState(state: Parcelable?) {
-        if (state != null && state is com.ivianuu.stickyheaders.SavedState) {
+        if (state != null && state is SavedState) {
             pendingScrollOffset = state.pendingScrollOffset
             pendingScrollPosition = state.pendingScrollPosition
             super.onRestoreInstanceState(state.superState)
@@ -562,10 +550,23 @@ class StickyHeadersLayoutManager @JvmOverloads constructor(
             }
         }
     }
-}
 
-@SuppressLint("ParcelCreator")
-@Parcelize
-data class SavedState(val superState: Parcelable,
-                      val pendingScrollPosition: Int,
-                      val pendingScrollOffset: Int): Parcelable
+    /**
+     * Callback to determine if the position is a sticky header or not
+     */
+    interface Callback {
+
+        fun isStickyHeader(position: Int): Boolean
+
+        fun setupStickyHeaderView(stickyHeader: View)
+
+        fun teardownStickyHeaderView(stickyHeader: View)
+    }
+
+    @SuppressLint("ParcelCreator")
+    @Parcelize
+    data class SavedState(val superState: Parcelable,
+                          val pendingScrollPosition: Int,
+                          val pendingScrollOffset: Int): Parcelable
+
+}

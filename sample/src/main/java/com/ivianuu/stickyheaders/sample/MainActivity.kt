@@ -7,7 +7,6 @@ import android.os.Bundle
 import android.support.v7.widget.RecyclerView
 import android.view.View
 import android.widget.Button
-import com.ivianuu.stickyheaders.StickyHeadersCallback
 import com.ivianuu.stickyheaders.StickyHeadersLayoutManager
 
 class MainActivity : AppCompatActivity() {
@@ -30,7 +29,7 @@ class MainActivity : AppCompatActivity() {
                 set(getSampleData())
             }
             layoutManager = StickyHeadersLayoutManager(this@MainActivity).apply {
-                callback = object : StickyHeadersCallback{
+                callback = object : StickyHeadersLayoutManager.Callback {
                     override fun isStickyHeader(position: Int) =
                         adapter.getItemViewType(position) == R.layout.item_header
 
