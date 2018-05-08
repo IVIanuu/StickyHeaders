@@ -22,11 +22,11 @@ apply plugin: 'com.github.dcendents.android-maven'
 group='com.github.ivianuu'
 
 android {
-    compileSdkVersion rootProject.ext.compileSdkVersion
+    compileSdkVersion Versions.compileSdk
 
     defaultConfig {
-        minSdkVersion rootProject.ext.minSdkVersion
-        targetSdkVersion rootProject.ext.targetSdkVersion
+        minSdkVersion Versions.minSdk
+        targetSdkVersion Versions.targetSdk
     }
     androidExtensions {
         experimental = true
@@ -35,10 +35,10 @@ android {
 
 dependencies {
     // Android Support
-    implementation rootProject.ext.supportRecyclerView
+    implementation Deps.supportRecyclerView
 
     // Kotlin
-    api rootProject.ext.kotlinStdlib
+    api Deps.kotlinStdLib
 }
 
 // build a jar with source files
