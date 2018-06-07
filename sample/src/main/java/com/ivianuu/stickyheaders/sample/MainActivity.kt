@@ -31,7 +31,7 @@ class MainActivity : AppCompatActivity() {
             layoutManager = StickyHeadersLayoutManager(this@MainActivity).apply {
                 callback = object : StickyHeadersLayoutManager.Callback {
                     override fun isStickyHeader(position: Int) =
-                        adapter.getItemViewType(position) == R.layout.item_header
+                        adapter!!.getItemViewType(position) == R.layout.item_header
 
                     override fun setupStickyHeaderView(stickyHeader: View) {
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {

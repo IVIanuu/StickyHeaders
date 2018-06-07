@@ -34,11 +34,8 @@ android {
 }
 
 dependencies {
-    // Android Support
-    implementation Deps.supportRecyclerView
-
-    // Kotlin
     api Deps.kotlinStdLib
+    api Deps.supportRecyclerView
 }
 
 // build a jar with source files

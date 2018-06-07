@@ -16,7 +16,6 @@
 
 package com.ivianuu.stickyheaders
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.PointF
 import android.os.Build
@@ -35,7 +34,7 @@ class StickyHeadersLayoutManager @JvmOverloads constructor(
     context: Context,
     orientation: Int = LinearLayoutManager.VERTICAL,
     reverseLayout: Boolean = false
-): LinearLayoutManager(context, orientation, reverseLayout) {
+) : LinearLayoutManager(context, orientation, reverseLayout) {
 
     var stickyHeaderTranslationX = 0f
         set(value) {
@@ -84,7 +83,10 @@ class StickyHeadersLayoutManager @JvmOverloads constructor(
         setAdapter(view.adapter)
     }
 
-    override fun onAdapterChanged(oldAdapter: RecyclerView.Adapter<*>?, newAdapter: RecyclerView.Adapter<*>?) {
+    override fun onAdapterChanged(
+        oldAdapter: RecyclerView.Adapter<*>?,
+        newAdapter: RecyclerView.Adapter<*>?
+    ) {
         super.onAdapterChanged(oldAdapter, newAdapter)
         newAdapter?.let { setAdapter(it) }
     }
@@ -104,7 +106,8 @@ class StickyHeadersLayoutManager @JvmOverloads constructor(
 
     override fun onSaveInstanceState(): Parcelable? {
         return SavedState(
-            super.onSaveInstanceState(), pendingScrollPosition, pendingScrollOffset)
+            super.onSaveInstanceState(), pendingScrollPosition, pendingScrollOffset
+        )
     }
 
     override fun onRestoreInstanceState(state: Parcelable?) {
@@ -117,7 +120,11 @@ class StickyHeadersLayoutManager @JvmOverloads constructor(
         }
     }
 
-    override fun scrollVerticallyBy(dy: Int, recycler: RecyclerView.Recycler, state: RecyclerView.State): Int {
+    override fun scrollVerticallyBy(
+        dy: Int,
+        recycler: RecyclerView.Recycler,
+        state: RecyclerView.State
+    ): Int {
         detachStickyHeader()
         val scrolled = super.scrollVerticallyBy(dy, recycler, state)
         attachStickyHeader()
@@ -127,7 +134,11 @@ class StickyHeadersLayoutManager @JvmOverloads constructor(
         return scrolled
     }
 
-    override fun scrollHorizontallyBy(dx: Int, recycler: RecyclerView.Recycler, state: RecyclerView.State): Int {
+    override fun scrollHorizontallyBy(
+        dx: Int,
+        recycler: RecyclerView.Recycler,
+        state: RecyclerView.State
+    ): Int {
         detachStickyHeader()
         val scrolled = super.scrollHorizontallyBy(dx, recycler, state)
         attachStickyHeader()
@@ -153,7 +164,11 @@ class StickyHeadersLayoutManager @JvmOverloads constructor(
         scrollToPositionWithOffset(position, offset, true)
     }
 
-    private fun scrollToPositionWithOffset(position: Int, offset: Int, adjustForStickyHeader: Boolean) {
+    private fun scrollToPositionWithOffset(
+        position: Int,
+        offset: Int,
+        adjustForStickyHeader: Boolean
+    ) {
         // Reset pending scroll.
         setPendingScroll(RecyclerView.NO_POSITION, LinearLayoutManager.INVALID_OFFSET)
 
@@ -180,7 +195,8 @@ class StickyHeadersLayoutManager @JvmOverloads constructor(
 
         // Current sticky header is the same as at the position. Adjust the scroll offset and reset pending scroll.
         if (stickyHeader != null && headerIndex == findHeaderIndex(stickyHeaderPosition)) {
-            val adjustedOffset = (if (offset != LinearLayoutManager.INVALID_OFFSET) offset else 0) + stickyHeader.height
+            val adjustedOffset =
+                (if (offset != LinearLayoutManager.INVALID_OFFSET) offset else 0) + stickyHeader.height
             super.scrollToPositionWithOffset(position, adjustedOffset)
             return
         }
@@ -190,57 +206,58 @@ class StickyHeadersLayoutManager @JvmOverloads constructor(
         super.scrollToPositionWithOffset(position, offset)
     }
 
-    override fun computeVerticalScrollExtent(state: RecyclerView.State?): Int {
+    override fun computeVerticalScrollExtent(state: RecyclerView.State): Int {
         detachStickyHeader()
         val extent = super.computeVerticalScrollExtent(state)
         attachStickyHeader()
         return extent
     }
 
-    override fun computeVerticalScrollOffset(state: RecyclerView.State?): Int {
+    override fun computeVerticalScrollOffset(state: RecyclerView.State): Int {
         detachStickyHeader()
         val offset = super.computeVerticalScrollOffset(state)
         attachStickyHeader()
         return offset
     }
 
-    override fun computeVerticalScrollRange(state: RecyclerView.State?): Int {
+    override fun computeVerticalScrollRange(state: RecyclerView.State): Int {
         detachStickyHeader()
         val range = super.computeVerticalScrollRange(state)
         attachStickyHeader()
         return range
     }
 
-    override fun computeHorizontalScrollExtent(state: RecyclerView.State?): Int {
+    override fun computeHorizontalScrollExtent(state: RecyclerView.State): Int {
         detachStickyHeader()
         val extent = super.computeHorizontalScrollExtent(state)
         attachStickyHeader()
         return extent
     }
 
-    override fun computeHorizontalScrollOffset(state: RecyclerView.State?): Int {
+    override fun computeHorizontalScrollOffset(state: RecyclerView.State): Int {
         detachStickyHeader()
         val offset = super.computeHorizontalScrollOffset(state)
         attachStickyHeader()
         return offset
     }
 
-    override fun computeHorizontalScrollRange(state: RecyclerView.State?): Int {
+    override fun computeHorizontalScrollRange(state: RecyclerView.State): Int {
         detachStickyHeader()
         val range = super.computeHorizontalScrollRange(state)
         attachStickyHeader()
         return range
     }
 
-    override fun computeScrollVectorForPosition(targetPosition: Int): PointF {
+    override fun computeScrollVectorForPosition(targetPosition: Int): PointF? {
         detachStickyHeader()
         val vector = super.computeScrollVectorForPosition(targetPosition)
         attachStickyHeader()
         return vector
     }
 
-    override fun onFocusSearchFailed(focused: View?, focusDirection: Int, recycler: RecyclerView.Recycler?,
-                                     state: RecyclerView.State?
+    override fun onFocusSearchFailed(
+        focused: View, focusDirection: Int, recycler: RecyclerView.Recycler,
+        state: RecyclerView.State
     ): View? {
         detachStickyHeader()
         val view = super.onFocusSearchFailed(focused, focusDirection, recycler, state)
@@ -268,7 +285,7 @@ class StickyHeadersLayoutManager @JvmOverloads constructor(
             var anchorIndex = -1
             var anchorPos = -1
             for (i in 0 until childCount) {
-                val child = getChildAt(i)
+                val child = getChildAt(i)!!
                 val params = child.layoutParams as RecyclerView.LayoutParams
                 if (isViewValidAnchor(child, params)) {
                     anchorView = child
@@ -280,18 +297,19 @@ class StickyHeadersLayoutManager @JvmOverloads constructor(
             if (anchorView != null && anchorPos != -1) {
                 val headerIndex = findHeaderIndexOrBefore(anchorPos)
                 val headerPos = if (headerIndex != -1) headerPositions[headerIndex] else -1
-                val nextHeaderPos = if (headerCount > headerIndex + 1) headerPositions[headerIndex + 1] else -1
+                val nextHeaderPos =
+                    if (headerCount > headerIndex + 1) headerPositions[headerIndex + 1] else -1
 
                 // Show sticky header if:
                 // - There's one to show;
                 // - It's on the edge or it's not the anchor view;
                 // - Isn't followed by another sticky header;
                 if (headerPos != -1
-                        && (headerPos != anchorPos || isViewOnBoundary(anchorView))
-                        && nextHeaderPos != headerPos + 1) {
+                    && (headerPos != anchorPos || isViewOnBoundary(anchorView))
+                    && nextHeaderPos != headerPos + 1) {
                     // Ensure existing sticky header, if any, is of correct type.
-                    if (stickyHeader != null && getItemViewType(
-                            stickyHeader) != adapter?.getItemViewType(headerPos)) {
+                    if (stickyHeader != null
+                        && getItemViewType(stickyHeader!!) != adapter?.getItemViewType(headerPos)) {
                         // A sticky header was shown before but is not of the correct type. Scrap it.
                         scrapStickyHeader(recycler)
                     }
@@ -356,7 +374,8 @@ class StickyHeadersLayoutManager @JvmOverloads constructor(
 
         // If we have a pending scroll wait until the end of layout and scroll again.
         if (pendingScrollPosition != RecyclerView.NO_POSITION) {
-            stickyHeader.viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
+            stickyHeader.viewTreeObserver.addOnGlobalLayoutListener(object :
+                ViewTreeObserver.OnGlobalLayoutListener {
                 override fun onGlobalLayout() {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
                         stickyHeader.viewTreeObserver.removeOnGlobalLayoutListener(this)
@@ -367,8 +386,10 @@ class StickyHeadersLayoutManager @JvmOverloads constructor(
 
                     if (pendingScrollPosition != RecyclerView.NO_POSITION) {
                         scrollToPositionWithOffset(pendingScrollPosition, pendingScrollOffset)
-                        setPendingScroll(RecyclerView.NO_POSITION,
-                                LinearLayoutManager.INVALID_OFFSET)
+                        setPendingScroll(
+                            RecyclerView.NO_POSITION,
+                            LinearLayoutManager.INVALID_OFFSET
+                        )
                     }
                 }
             })
@@ -555,7 +576,6 @@ class StickyHeadersLayoutManager @JvmOverloads constructor(
      * Callback to determine if the position is a sticky header or not
      */
     interface Callback {
-
         fun isStickyHeader(position: Int): Boolean
 
         fun setupStickyHeaderView(stickyHeader: View)
@@ -563,10 +583,11 @@ class StickyHeadersLayoutManager @JvmOverloads constructor(
         fun teardownStickyHeaderView(stickyHeader: View)
     }
 
-    @SuppressLint("ParcelCreator")
     @Parcelize
-    data class SavedState(val superState: Parcelable,
-                          val pendingScrollPosition: Int,
-                          val pendingScrollOffset: Int): Parcelable
+    data class SavedState(
+        val superState: Parcelable?,
+        val pendingScrollPosition: Int,
+        val pendingScrollOffset: Int
+    ) : Parcelable
 
 }
