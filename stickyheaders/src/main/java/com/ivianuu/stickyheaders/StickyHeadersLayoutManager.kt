@@ -32,6 +32,7 @@ import java.util.*
  */
 class StickyHeadersLayoutManager @JvmOverloads constructor(
     context: Context,
+    callback: Callback? = null,
     orientation: Int = LinearLayoutManager.VERTICAL,
     reverseLayout: Boolean = false
 ) : LinearLayoutManager(context, orientation, reverseLayout) {
@@ -50,7 +51,7 @@ class StickyHeadersLayoutManager @JvmOverloads constructor(
             requestLayout()
         }
 
-    var callback: StickyHeadersLayoutManager.Callback? = null
+    var callback: Callback? = null
 
     var areStickyHeadersEnabled = true
         set(value) {

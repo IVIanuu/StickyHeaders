@@ -26,9 +26,13 @@ import android.widget.TextView
 /**
  * @author Manuel Wrage (IVIanuu)
  */
-class SampleAdapter: RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+class SampleAdapter(initialData: List<Any>): RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     private val data = ArrayList<Any>()
+
+    init {
+        set(initialData)
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         val view = LayoutInflater.from(parent.context)

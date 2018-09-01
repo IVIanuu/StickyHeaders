@@ -14,42 +14,40 @@ class MainActivity : AppCompatActivity() {
     private val button by lazy(LazyThreadSafetyMode.NONE) { findViewById<Button>(R.id.toggle_headers_button) }
     private val recycler by lazy(LazyThreadSafetyMode.NONE) { findViewById<RecyclerView>(R.id.recycler) }
 
+    private val stickyHeadersCallback = object : StickyHeadersLayoutManager.Callback {
+        override fun isStickyHeader(position: Int) =
+            recycler.adapter!!.getItemViewType(position) == R.layout.item_header
+
+        override fun setupStickyHeaderView(stickyHeader: View) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                stickyHeader.animate()
+                    .translationZ(4.px)
+                    .start()
+            }
+        }
+
+        override fun teardownStickyHeaderView(stickyHeader: View) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                stickyHeader.animate()
+                    .translationZ(0f)
+                    .start()
+            }
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        button.setOnClickListener {
-            (recycler.layoutManager as StickyHeadersLayoutManager).let {
+        button.setOnClickListener { _ ->
+            (recycler.layoutManager as StickyHeadersLayoutManager).let{
                 it.areStickyHeadersEnabled = !it.areStickyHeadersEnabled
             }
         }
 
         recycler.apply {
-            adapter = SampleAdapter().apply {
-                set(getSampleData())
-            }
-            layoutManager = StickyHeadersLayoutManager(this@MainActivity).apply {
-                callback = object : StickyHeadersLayoutManager.Callback {
-                    override fun isStickyHeader(position: Int) =
-                        adapter!!.getItemViewType(position) == R.layout.item_header
-
-                    override fun setupStickyHeaderView(stickyHeader: View) {
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                            stickyHeader.animate()
-                                .translationZ(4.px)
-                                .start()
-                        }
-                    }
-
-                    override fun teardownStickyHeaderView(stickyHeader: View) {
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                            stickyHeader.animate()
-                                .translationZ(0f)
-                                .start()
-                        }
-                    }
-                }
-            }
+            adapter = SampleAdapter(getSampleData())
+            layoutManager = StickyHeadersLayoutManager(this@MainActivity, stickyHeadersCallback)
         }
     }
 
