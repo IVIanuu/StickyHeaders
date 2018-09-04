@@ -20,10 +20,10 @@ import android.content.Context
 import android.graphics.PointF
 import android.os.Build
 import android.os.Parcelable
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
 import android.view.View
 import android.view.ViewTreeObserver
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.parcel.Parcelize
 import java.util.*
 
@@ -33,7 +33,7 @@ import java.util.*
 class StickyHeadersLayoutManager @JvmOverloads constructor(
     context: Context,
     callback: Callback? = null,
-    orientation: Int = LinearLayoutManager.VERTICAL,
+    orientation: Int = RecyclerView.VERTICAL,
     reverseLayout: Boolean = false
 ) : LinearLayoutManager(context, orientation, reverseLayout) {
 
@@ -74,6 +74,10 @@ class StickyHeadersLayoutManager @JvmOverloads constructor(
 
     private var pendingScrollPosition = RecyclerView.NO_POSITION
     private var pendingScrollOffset = 0
+
+    init {
+        this.callback = callback
+    }
 
     fun isStickyHeader(view: View): Boolean {
         return view == stickyHeader

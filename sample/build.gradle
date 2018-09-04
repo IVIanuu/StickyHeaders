@@ -29,12 +29,9 @@ android {
 }
 
 dependencies {
-    // Android Support
-    implementation Deps.supportAppCompat
+    implementation Deps.androidxAppCompat
 
-    // Kotlin
     implementation Deps.kotlinStdLib
-
-    // Extensions
+    
     implementation project(':stickyheaders')
 }

@@ -34,8 +34,8 @@ android {
 }
 
 dependencies {
+    api Deps.androidXRecyclerView
     api Deps.kotlinStdLib
-    api Deps.supportRecyclerView
 }
 
 // build a jar with source files
