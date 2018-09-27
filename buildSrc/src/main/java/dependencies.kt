@@ -6,13 +6,14 @@ object Versions {
     const val minSdk = 14
     const val targetSdk = 28
     const val versionCode = 1
-    const val versionName = "1.0"
+    const val versionName = "SNAPSHOT"
+    const val groupId = "com.ivianuu.stickyheaders"
 
-    const val androidGradlePlugin = "3.2.0-rc02"
+    const val androidGradlePlugin = "3.2.0"
 
-    const val androidx = "1.0.0-rc02"
+    const val androidx = "1.0.0"
 
-    const val kotlin = "1.2.61"
+    const val kotlin = "1.3.0-rc-57"
     const val mavenGradle = "2.1"
 }
 
@@ -23,7 +24,7 @@ object Deps {
     const val androidXRecyclerView = "androidx.recyclerview:recyclerview:${Versions.androidx}"
 
     const val kotlinGradlePlugin = "org.jetbrains.kotlin:kotlin-gradle-plugin:${Versions.kotlin}"
-    const val kotlinStdLib = "org.jetbrains.kotlin:kotlin-stdlib-jre7:${Versions.kotlin}"
+    const val kotlinStdLib = "org.jetbrains.kotlin:kotlin-stdlib-jdk7:${Versions.kotlin}"
 
     const val mavenGradlePlugin = "com.github.dcendents:android-maven-gradle-plugin:${Versions.mavenGradle}"
 }

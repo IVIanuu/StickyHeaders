@@ -30,8 +30,6 @@ android {
 
 dependencies {
     implementation Deps.androidxAppCompat
-
     implementation Deps.kotlinStdLib
-    
     implementation project(':stickyheaders')
 }
