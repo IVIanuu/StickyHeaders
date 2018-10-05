@@ -25,7 +25,6 @@ import android.view.ViewTreeObserver
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.parcel.Parcelize
-import java.util.*
 
 /**
  * [LinearLayoutManager] with sticky header support
@@ -37,36 +36,51 @@ class StickyHeadersLayoutManager @JvmOverloads constructor(
     reverseLayout: Boolean = false
 ) : LinearLayoutManager(context, orientation, reverseLayout) {
 
+    /**
+     * The x translation of sticky headers
+     */
     var stickyHeaderTranslationX = 0f
         set(value) {
-            if (field == value) return
-            field = value
-            requestLayout()
+            if (field != value) {
+                field = value
+                requestLayout()
+            }
         }
 
+    /**
+     * The y translation of sticky headers
+     */
     var stickyHeaderTranslationY = 0f
         set(value) {
-            if (field == value) return
-            field = value
-            requestLayout()
+            if (field != value) {
+                field = value
+                requestLayout()
+            }
         }
 
+    /**
+     * The callback which will be used internally
+     */
     var callback: Callback? = null
 
+    /**
+     * Whether or not sticky headers should be shown or not
+     */
     var areStickyHeadersEnabled = true
         set(value) {
-            if (field == value) return
-            field = value
-            if (value) {
-                requestLayout()
-            } else if (stickyHeader != null) {
-                scrapStickyHeader(null)
+            if (field != value) {
+                field = value
+                if (value) {
+                    requestLayout()
+                } else if (stickyHeader != null) {
+                    scrapStickyHeader(null)
+                }
             }
         }
 
     private var adapter: RecyclerView.Adapter<*>? = null
 
-    private val headerPositions = ArrayList<Int>()
+    private val headerPositions = mutableListOf<Int>()
     private val headerPositionsObserver = HeaderPositionsAdapterDataObserver()
 
     private var stickyHeader: View? = null
@@ -79,9 +93,10 @@ class StickyHeadersLayoutManager @JvmOverloads constructor(
         this.callback = callback
     }
 
-    fun isStickyHeader(view: View): Boolean {
-        return view == stickyHeader
-    }
+    /**
+     * Returns whether or not [view] is the current sticky header
+     */
+    fun isStickyHeader(view: View) = view == stickyHeader
 
     override fun onAttachedToWindow(view: RecyclerView) {
         super.onAttachedToWindow(view)
@@ -109,11 +124,9 @@ class StickyHeadersLayoutManager @JvmOverloads constructor(
         }
     }
 
-    override fun onSaveInstanceState(): Parcelable? {
-        return SavedState(
-            super.onSaveInstanceState(), pendingScrollPosition, pendingScrollOffset
-        )
-    }
+    override fun onSaveInstanceState(): Parcelable? = SavedState(
+        super.onSaveInstanceState(), pendingScrollPosition, pendingScrollOffset
+    )
 
     override fun onRestoreInstanceState(state: Parcelable?) {
         if (state != null && state is SavedState) {
@@ -564,15 +577,15 @@ class StickyHeadersLayoutManager @JvmOverloads constructor(
         }
 
         private fun handleChange() {
-            adapter?.let {
-                headerPositions.clear()
-                val itemCount = it.itemCount
-                (0 until itemCount).filterTo(headerPositions) { isStickyHeader(it) }
+            val adapter = adapter ?: return
 
-                // Remove sticky header immediately if the entry it represents has been removed. A layout will follow.
-                if (stickyHeader != null && !headerPositions.contains(stickyHeaderPosition)) {
-                    scrapStickyHeader(null)
-                }
+            headerPositions.clear()
+            val itemCount = adapter.itemCount
+            (0 until itemCount).filterTo(headerPositions) { isStickyHeader(it) }
+
+            // Remove sticky header immediately if the entry it represents has been removed. A layout will follow.
+            if (stickyHeader != null && !headerPositions.contains(stickyHeaderPosition)) {
+                scrapStickyHeader(null)
             }
         }
     }
@@ -589,7 +602,7 @@ class StickyHeadersLayoutManager @JvmOverloads constructor(
     }
 
     @Parcelize
-    data class SavedState(
+    private data class SavedState(
         val superState: Parcelable?,
         val pendingScrollPosition: Int,
         val pendingScrollOffset: Int
