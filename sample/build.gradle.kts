@@ -1,3 +1,4 @@
+import org.jetbrains.kotlin.gradle.internal.AndroidExtensionsExtension
 import org.jetbrains.kotlin.kapt3.base.Kapt.kapt
 
 /*
@@ -36,7 +37,10 @@ android {
     }
 
     androidExtensions {
-        isExperimental = true
+        // isExperimental = true
+        configure(delegateClosureOf<AndroidExtensionsExtension> {
+            isExperimental = true
+        })
     }
 
     kapt { correctErrorTypes = true }

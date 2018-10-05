@@ -4,19 +4,15 @@ import android.content.res.Resources
 import android.os.Build
 import android.os.Bundle
 import android.view.View
-import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
-import androidx.recyclerview.widget.RecyclerView
 import com.ivianuu.stickyheaders.StickyHeadersLayoutManager
+import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
 
-    private val button by lazy(LazyThreadSafetyMode.NONE) { findViewById<Button>(R.id.toggle_headers_button) }
-    private val recycler by lazy(LazyThreadSafetyMode.NONE) { findViewById<RecyclerView>(R.id.recycler) }
-
     private val stickyHeadersCallback = object : StickyHeadersLayoutManager.Callback {
         override fun isStickyHeader(position: Int) =
-            recycler.adapter!!.getItemViewType(position) == R.layout.item_header
+            recycler.adapter?.getItemViewType(position) == R.layout.item_header
 
         override fun setupStickyHeaderView(stickyHeader: View) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -39,21 +35,21 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        button.setOnClickListener { _ ->
-            (recycler.layoutManager as StickyHeadersLayoutManager).let{
-                it.areStickyHeadersEnabled = !it.areStickyHeadersEnabled
-            }
-        }
-
         recycler.apply {
             adapter = SampleAdapter(getSampleData())
             layoutManager = StickyHeadersLayoutManager(this@MainActivity, stickyHeadersCallback)
+        }
+
+        toggle_headers_button.setOnClickListener { _ ->
+            (recycler.layoutManager as StickyHeadersLayoutManager).let {
+                it.areStickyHeadersEnabled = !it.areStickyHeadersEnabled
+            }
         }
     }
 
     private fun getSampleData(): List<Any> {
         var count = 0
-        val data = ArrayList<Any>()
+        val data = mutableListOf<Any>()
         for (i in 0 until 1000) {
             if (count == 0) {
                 data.add(HeaderItem("Header $i"))
