@@ -115,10 +115,12 @@ class StickyHeadersLayoutManager @JvmOverloads constructor(
         this.adapter?.unregisterAdapterDataObserver(headerPositionsObserver)
 
         if (adapter != null) {
+            if (adapter is Callback) callback = adapter
             this.adapter = adapter
             adapter.registerAdapterDataObserver(headerPositionsObserver)
             headerPositionsObserver.onChanged()
         } else {
+            if (this.adapter == callback) callback = null
             this.adapter = null
             headerPositions.clear()
         }
